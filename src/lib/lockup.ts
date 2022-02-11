@@ -64,7 +64,7 @@ export const lookupLockup = async (accountId: string): Promise<Lockup> | undefin
   try {
     const lockupAccount = await (await nearApi()).account(accountId);
     const [ lockupAccountBalance, lockupState ] = await Promise.all([
-      lockupAccount.viewFunction(accountId, 'get_balance', {}),
+      lockupAccount.viewFunction(accountId, "get_balance", {}),
       viewLockupState(accountId)
     ]);
 
