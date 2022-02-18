@@ -41,6 +41,11 @@
     "types": ["node"],
     "typeRoots": ["node_modules/@types", "src/types"]
   },
+  "typedocOptions": {
+    "entryPoints": ["./src"],
+    "exclude": "**/*.spec.ts",
+    "out": "build/docs"
+  },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**"],
   "compileOnSave": false

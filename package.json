@@ -31,7 +31,7 @@
     "cov:send": "run-s cov:lcov && codecov",
     "cov:check": "nyc report && nyc check-coverage --lines 100 --functions 100 --branches 100",
     "doc": "run-s doc:html && open-cli build/docs/index.html",
-    "doc:html": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --out build/docs",
+    "doc:html": "typedoc",
     "doc:json": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --json build/docs/typedoc.json",
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "version": "standard-version",
@@ -44,15 +44,12 @@
   "dependencies": {
     "@bitauth/libauth": "^1.17.1",
     "bn.js": "^5.2.0",
-    "bs58": "^4.0.1",
-    "js-sha256": "^0.9.0",
     "near-api-js": "^0.44.2"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@types/bn.js": "^5.1.0",
-    "@types/bs58": "^4.0.1",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
     "ava": "^3.12.1",
@@ -71,7 +68,7 @@
     "prettier": "^2.1.1",
     "standard-version": "^9.0.0",
     "ts-node": "^9.0.0",
-    "typedoc": "^0.19.0",
+    "typedoc": "^0.22.11",
     "typescript": "^4.0.2"
   },
   "files": [
@@ -101,7 +98,7 @@
     }
   },
   "prettier": {
-    "singleQuote": true
+    "singleQuote": false
   },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",

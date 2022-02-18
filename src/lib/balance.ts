@@ -5,7 +5,6 @@ import { LockupState, VestingInformation } from "../types/types";
 import { getStartLockupTimestamp, saturatingSub } from "./utils";
 
 /**
- *
  * @param releaseDuration release duration
  * @param lockupTimestamp lockup timestamp
  * @param brokenTimestamp is there broken timestamp
@@ -31,9 +30,7 @@ const getUnreleasedAmount = (
       return new BN(0);
     } else {
       const timeLeft = endTimestamp.sub(blockTimestamp);
-      return lockupAmount
-        .mul(timeLeft)
-        .div(releaseDuration);
+      return lockupAmount.mul(timeLeft).div(releaseDuration);
     }
   } else {
     return new BN(0);
@@ -44,7 +41,7 @@ const getUnvestedAmount = (
   vestingInformation: VestingInformation,
   blockTimestamp: BN,
   lockupAmount: BN
-  ) => {
+) => {
   if (vestingInformation) {
     if (vestingInformation.unvestedAmount) {
       // was terminated
@@ -57,9 +54,7 @@ const getUnvestedAmount = (
         return new BN(0);
       } else {
         const timeLeft = vestingInformation.end.sub(blockTimestamp);
-        const totalTime = vestingInformation.end.sub(
-          vestingInformation.start
-        );
+        const totalTime = vestingInformation.end.sub(vestingInformation.start);
         return lockupAmount.mul(timeLeft).div(totalTime);
       }
     }
@@ -115,4 +110,4 @@ export const getLockedTokenAmount = async (lockupState: LockupState) => {
     saturatingSub(unreleasedAmount, lockupState.terminationWithdrawnTokens),
     unvestedAmount
   );
-}
+};
