@@ -1,6 +1,6 @@
 import BN from "bn.js";
 import * as nearAPI from "near-api-js";
-import { ViewStateResult } from "near-api-js/lib/providers/provider";
+import { BlockReference, ViewStateResult } from "near-api-js/lib/providers/provider";
 import { BinaryReader } from "near-api-js/lib/utils/serialize";
 
 import { AccountLockup, Lockup, LockupState } from "../types/types";
@@ -13,15 +13,26 @@ import {
   getStartLockupTimestamp,
   getTransferInformation,
   getVestingInformation,
-  readOption
+  readOption,
 } from "./utils";
 
-export const viewLockupState = async (contractId: string): Promise<LockupState> => {
+/**
+ * View state of lockup account
+ * @param contractId near lockup accountId used to interact with the network.
+ * @param blockReference specify block {@link BlockReference}. Default is `{ finality: "final" }`.
+ * @returns state of lockup account {@link LockupState}.
+ */
+export const viewLockupState = async (
+  contractId: string,
+  blockReference: BlockReference = { finality: "final" }
+): Promise<LockupState> => {
   const near = await nearApi();
-  const lockupAccountCodeHash = (await (await near.account(contractId)).state()).code_hash;
+  const lockupAccountCodeHash = (await (await near.account(contractId)).state())
+    .code_hash;
 
   const result = await near.connection.provider.query<ViewStateResult>({
     request_type: "view_state",
+    ...blockReference,
     finality: "final",
     account_id: contractId,
     prefix_base64: Buffer.from("STATE", "utf-8").toString("base64"),
@@ -36,8 +47,8 @@ export const viewLockupState = async (contractId: string): Promise<LockupState> 
   const lockupTimestamp = readOption(reader);
   // More details: https://github.com/near/core-contracts/pull/136
   const hasBrokenTimestamp = [
-    '3kVY9qcVRoW3B5498SMX6R3rtSLiCdmBzKs7zcnzDJ7Q',
-    'DiC9bKCqUHqoYqUXovAnqugiuntHWnM3cAc7KrgaHTu'
+    "3kVY9qcVRoW3B5498SMX6R3rtSLiCdmBzKs7zcnzDJ7Q",
+    "DiC9bKCqUHqoYqUXovAnqugiuntHWnM3cAc7KrgaHTu",
   ].includes(lockupAccountCodeHash);
 
   const transferInformation = getTransferInformation(reader);
@@ -52,20 +63,22 @@ export const viewLockupState = async (contractId: string): Promise<LockupState> 
     lockupTimestamp: new BN(lockupTimestamp),
     transferInformation,
     vestingInformation,
-    hasBrokenTimestamp
-  }
-}
+    hasBrokenTimestamp,
+  };
+};
 
 /**
- *
+ * View balance and state of lockup account.
  * @param accountId near lockup accountId used to interact with the network.
  */
-export const lookupLockup = async (accountId: string): Promise<Lockup> | undefined => {
+export const lookupLockup = async (
+  accountId: string
+): Promise<Lockup> | undefined => {
   try {
     const lockupAccount = await (await nearApi()).account(accountId);
-    const [ lockupAccountBalance, lockupState ] = await Promise.all([
+    const [lockupAccountBalance, lockupState] = await Promise.all([
       lockupAccount.viewFunction(accountId, "get_balance", {}),
-      viewLockupState(accountId)
+      viewLockupState(accountId),
     ]);
 
     return { lockupAccountBalance, lockupState };
@@ -74,21 +87,28 @@ export const lookupLockup = async (accountId: string): Promise<Lockup> | undefin
     console.error(`${accountId} doesn't exist`);
     return undefined;
   }
-}
+};
 
 /**
-* @param lockupAccountId - near lockup accountId used to interact with the network.
-*/
-export async function viewLockupAccount(lockupAccountId: string): Promise<AccountLockup> {
+ * View all information about lockup account.
+ * @param lockupAccountId - near lockup accountId used to interact with the network.
+ * @returns lockup account information {@link AccountLockup}
+ */
+export const viewLockupAccount = async (
+  lockupAccountId: string
+): Promise<AccountLockup> => {
   const near = await nearApi();
 
   try {
     const account = await near.account(lockupAccountId);
     const ownerAccountBalance = (await account.state()).amount;
-    const { lockupAccountBalance, lockupState } = await lookupLockup(lockupAccountId);
+    const { lockupAccountBalance, lockupState } = await lookupLockup(
+      lockupAccountId
+    );
 
     if (lockupState) {
-      const { releaseDuration, vestingInformation, ...restLockupState } = lockupState;
+      const { releaseDuration, vestingInformation, ...restLockupState } =
+        lockupState;
       const lockupReleaseStartTimestamp = getStartLockupTimestamp(
         lockupState.lockupDuration,
         lockupState.lockupTimestamp,
@@ -98,20 +118,36 @@ export async function viewLockupAccount(lockupAccountId: string): Promise<Accoun
 
       return {
         lockupAccountId,
-        ownerAccountBalance: nearAPI.utils.format.formatNearAmount(ownerAccountBalance, 2),
-        lockedAmount: nearAPI.utils.format.formatNearAmount(lockedAmount.toString(), 2),
-        liquidAmount: nearAPI.utils.format.formatNearAmount(new BN(lockupAccountBalance).sub(new BN(lockedAmount)).toString(), 2),
-        totalAmount: nearAPI.utils.format.formatNearAmount(new BN(ownerAccountBalance).add(new BN(lockupAccountBalance)).toString(), 2),
-        lockupReleaseStartDate: new Date(lockupReleaseStartTimestamp.divn(1000000).toNumber()),
+        ownerAccountBalance: nearAPI.utils.format.formatNearAmount(
+          ownerAccountBalance,
+          2
+        ),
+        lockedAmount: nearAPI.utils.format.formatNearAmount(
+          lockedAmount.toString(),
+          2
+        ),
+        liquidAmount: nearAPI.utils.format.formatNearAmount(
+          new BN(lockupAccountBalance).sub(new BN(lockedAmount)).toString(),
+          2
+        ),
+        totalAmount: nearAPI.utils.format.formatNearAmount(
+          new BN(ownerAccountBalance)
+            .add(new BN(lockupAccountBalance))
+            .toString(),
+          2
+        ),
+        lockupReleaseStartDate: new Date(
+          lockupReleaseStartTimestamp.divn(1000000).toNumber()
+        ),
         lockupState: {
           ...restLockupState,
           releaseDuration: formatReleseDuration(releaseDuration),
-          vestedInfo: formatVestingInfo(vestingInformation)
+          vestedInfo: formatVestingInfo(vestingInformation),
         },
-      }
+      };
     }
   } catch (error) {
     console.error(error);
   }
   return undefined;
-}
+};

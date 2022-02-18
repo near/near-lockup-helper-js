@@ -25,7 +25,7 @@ export type AccountLockup = {
   readonly totalAmount: string;
   readonly lockupReleaseStartDate: Date;
   readonly lockupState: LockupState & {
-    readonly vestedInfo: string
+    readonly vestedInfo: string;
   };
 };
 
