@@ -1,5 +1,6 @@
 import BN from "bn.js";
 import * as nearAPI from "near-api-js";
+import { ConnectConfig } from "near-api-js/lib/connect";
 import { BlockReference, ViewStateResult } from "near-api-js/lib/providers/provider";
 import { BinaryReader } from "near-api-js/lib/utils/serialize";
 
@@ -19,21 +20,22 @@ import {
 /**
  * View state of lockup account
  * @param contractId near lockup accountId used to interact with the network.
- * @param blockReference specify block {@link BlockReference}. Default is `{ finality: "final" }`.
+ * @param nearConfig specify custom connection to NEAR network.
+ * @param blockReference specify block {@link BlockReference} of calculated data. Default is `{ finality: "final" }`.
  * @returns state of lockup account {@link LockupState}.
  */
 export const viewLockupState = async (
   contractId: string,
+  nearConfig?: ConnectConfig,
   blockReference: BlockReference = { finality: "final" }
 ): Promise<LockupState> => {
-  const near = await nearApi();
+  const near = await nearApi(nearConfig);
   const lockupAccountCodeHash = (await (await near.account(contractId)).state())
     .code_hash;
 
   const result = await near.connection.provider.query<ViewStateResult>({
     request_type: "view_state",
     ...blockReference,
-    finality: "final",
     account_id: contractId,
     prefix_base64: Buffer.from("STATE", "utf-8").toString("base64"),
   });
@@ -70,15 +72,20 @@ export const viewLockupState = async (
 /**
  * View balance and state of lockup account.
  * @param accountId near lockup accountId used to interact with the network.
+ * @param nearConfig specify custom connection to NEAR network.
+ * @param blockReference specify block of calculated data.
  */
 export const lookupLockup = async (
-  accountId: string
+  accountId: string,
+  nearConfig?: ConnectConfig,
+  blockReference?: BlockReference
 ): Promise<Lockup> | undefined => {
+  const near = await nearApi(nearConfig);
   try {
-    const lockupAccount = await (await nearApi()).account(accountId);
+    const lockupAccount = await near.account(accountId);
     const [lockupAccountBalance, lockupState] = await Promise.all([
       lockupAccount.viewFunction(accountId, "get_balance", {}),
-      viewLockupState(accountId),
+      viewLockupState(accountId, nearConfig, blockReference),
     ]);
 
     return { lockupAccountBalance, lockupState };
@@ -91,19 +98,25 @@ export const lookupLockup = async (
 
 /**
  * View all information about lockup account.
- * @param lockupAccountId - near lockup accountId used to interact with the network.
- * @returns lockup account information {@link AccountLockup}
+ * @param lockupAccountId near lockup accountId used to interact with the network.
+ * @param nearConfig specify custom connection to NEAR network.
+ * @param blockReference specify block of calculated data.
+ * @returns lockup account information {@link AccountLockup}.
  */
 export const viewLockupAccount = async (
-  lockupAccountId: string
+  lockupAccountId: string,
+  nearConfig?: ConnectConfig,
+  blockReference?: BlockReference
 ): Promise<AccountLockup> => {
-  const near = await nearApi();
+  const near = await nearApi(nearConfig);
 
   try {
     const account = await near.account(lockupAccountId);
     const ownerAccountBalance = (await account.state()).amount;
     const { lockupAccountBalance, lockupState } = await lookupLockup(
-      lockupAccountId
+      lockupAccountId,
+      nearConfig,
+      blockReference
     );
 
     if (lockupState) {
