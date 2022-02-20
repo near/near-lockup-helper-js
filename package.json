@@ -89,6 +89,7 @@
       }
     },
     "files": [
+      "!src/tests/mock.ts",
       "!build/module/**"
     ]
   },
