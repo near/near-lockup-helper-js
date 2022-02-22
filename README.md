@@ -5,11 +5,19 @@ Javascript library to view lockup account information
 # Setup
 
 ```
-npm install
+$ npm i near-lockup-helper
+```
 
-npm run build
+# For local development
 
-npm pack
+```
+$ npm install
+```
+```
+$ npm run build
+```
+```
+$ npm pack
 ```
 
 After that you can install this packed library from another directory by
