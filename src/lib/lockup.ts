@@ -1,10 +1,9 @@
 import BN from "bn.js";
 import * as nearAPI from "near-api-js";
 import { ConnectConfig } from "near-api-js/lib/connect";
-import { BlockReference, ViewStateResult } from "near-api-js/lib/providers/provider";
 import { BinaryReader } from "near-api-js/lib/utils/serialize";
 
-import { AccountLockup, Lockup, LockupState } from "../types/types";
+import { AccountLockup, BlockReference, Lockup, LockupState, ViewStateResult } from "../types/types";
 
 import { getLockedTokenAmount } from "./balance";
 import { nearApi } from "./near";
@@ -27,7 +26,8 @@ import {
 export const viewLockupState = async (
   contractId: string,
   nearConfig?: ConnectConfig,
-  blockReference: BlockReference = { finality: "final" }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blockReference: BlockReference | any = { finality: "final" }
 ): Promise<LockupState> => {
   const near = await nearApi(nearConfig);
   const lockupAccountCodeHash = (await (await near.account(contractId)).state())
