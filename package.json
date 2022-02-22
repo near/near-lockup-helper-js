@@ -5,7 +5,7 @@
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
-  "repository": "https://github.com/shelegdmitriy/near-lockup-helper",
+  "repository": "https://github.com/near/near-lockup-helper-js",
   "license": "MIT",
   "keywords": [],
   "scripts": {
