@@ -1,4 +1,5 @@
 import BN from "bn.js";
+import { QueryResponseKind } from "near-api-js/lib/providers/provider";
 
 export type LockupState = {
   readonly owner: string;
@@ -41,4 +42,23 @@ export type VestingInformation = {
   readonly end?: BN;
   readonly unvestedAmount?: BN;
   readonly terminationStatus?: number;
+};
+
+type StateItem = {
+  readonly key: string;
+  readonly value: string;
+  readonly proof: readonly string[];
+}
+
+export type BlockReference = {
+  readonly block_id: string | number;
+} | {
+  readonly finality: "optimistic" | "near-final" | "final";
+} | {
+  readonly sync_checkpoint: "genesis" | "earliest_available";
+};
+
+export type ViewStateResult = QueryResponseKind & {
+  readonly values: readonly StateItem[];
+  readonly proof: readonly string[];
 };
