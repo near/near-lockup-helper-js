@@ -90,7 +90,7 @@
       }
     },
     "files": [
-      "!src/tests/mock.ts",
+      "!src/tests/snapshots.ts",
       "!build/module/**"
     ]
   },

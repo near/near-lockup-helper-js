@@ -34,8 +34,7 @@ import {
 export const viewLockupState = async (
   contractId: string,
   nearConfig?: ConnectConfig,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  blockReference: BlockReference | any = { finality: "final" }
+  blockReference: BlockReference = { finality: "final" }
 ): Promise<LockupState> => {
   const near = await nearApi(nearConfig);
   const lockupAccountCodeHash = (await viewLockupAccountBalance(
@@ -49,7 +48,8 @@ export const viewLockupState = async (
     ...blockReference,
     account_id: contractId,
     prefix_base64: Buffer.from("STATE", "utf-8").toString("base64"),
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
   const value = Buffer.from(result.values[0].value, "base64");
   const reader = new BinaryReader(value);
   const owner = reader.readString();
@@ -117,8 +117,7 @@ export const lookupLockup = async (
 export const viewLockupAccountBalance = async (
   accountId: string,
   nearConfig?: ConnectConfig,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  blockReference: BlockReference | any = { finality: "final" }
+  blockReference: BlockReference = { finality: "final" }
   ): Promise<ViewAccount | undefined> => {
   const near = await nearApi(nearConfig);
 
@@ -127,15 +126,12 @@ export const viewLockupAccountBalance = async (
       request_type: "view_account",
       ...blockReference,
       account_id: accountId,
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
     return {
       amount: viewAccount.amount,
-      locked: viewAccount.locked,
       codeHash: viewAccount.code_hash,
-      storageUsage: viewAccount.storage_usage,
-      storagePaidAt: viewAccount.storage_paid_at,
       blockHeight: viewAccount.block_height,
-      blockHash: viewAccount.block_hash
     }
   } catch (error) {
     console.error(error);

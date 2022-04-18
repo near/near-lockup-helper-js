@@ -1,24 +1,15 @@
 import BN from "bn.js";
-import * as nearAPI from "near-api-js";
 
 import { AccountLockup } from "../types/types";
 
-export const lockupDataMock: readonly AccountLockup[] = [
+export const lockupAccountSnapshots: readonly AccountLockup[] = [
   {
     lockupAccountId: "05cf32355756bec4d48664d322130881a4ca289c.lockup.near",
-    calculatedAtBlockHeight: 26490580,
+    calculatedAtBlockHeight: 59976515,
     ownerAccountBalance: "37.04",
-    lockedAmount: nearAPI.utils.format.formatNearAmount(
-      new BN("292128726922778807098027490328").toString(),
-      2
-    ),
-    liquidAmount: nearAPI.utils.format.formatNearAmount(
-      new BN("657787042560574010285992772541")
-      .sub(new BN("292128726922778807098027490328"))
-      .toString(),
-      2
-    ),
-    totalAmount: "657,824.09",
+    lockedAmount: "253,476.3",
+    liquidAmount: "384,310.74",
+    totalAmount: "637,824.0",
     lockupReleaseStartDate: new Date(new BN("1602614338293769340").divn(1000000).toNumber()),
     lockupState: {
       owner: '567a69e5ee660392866f7540d2dc6e9b99fea9e5926b0021e7eca86049802e1d',
@@ -39,16 +30,8 @@ export const lockupDataMock: readonly AccountLockup[] = [
     lockupAccountId: "84146973a9c419dc97a4a46641b5be70ee7f822e.lockup.near",
     calculatedAtBlockHeight: 59976515,
     ownerAccountBalance: "35",
-    lockedAmount: nearAPI.utils.format.formatNearAmount(
-      new BN("47090070000000000000000000000").toString(),
-      2
-    ),
-    liquidAmount: nearAPI.utils.format.formatNearAmount(
-      new BN("47090071464553200113900000000")
-      .sub(new BN("47090070000000000000000000000"))
-      .toString(),
-      2
-    ),
+    lockedAmount: "47,090.07",
+    liquidAmount: "0",
     totalAmount: "47,125.07",
     lockupReleaseStartDate: new Date(new BN("1602614338293769340").divn(1000000).toNumber()),
     lockupState: {
@@ -69,16 +52,8 @@ export const lockupDataMock: readonly AccountLockup[] = [
     lockupAccountId: "80a50388377db2df7399e29d625c3d5b4552a81d.lockup.near",
     calculatedAtBlockHeight: 26490580,
     ownerAccountBalance: "1,900,000",
-    lockedAmount: nearAPI.utils.format.formatNearAmount(
-      new BN("0").toString(),
-      2
-    ),
-    liquidAmount: nearAPI.utils.format.formatNearAmount(
-      new BN("35000647738262344800000000")
-      .sub(new BN("0"))
-      .toString(),
-      2
-    ),
+    lockedAmount: "0",
+    liquidAmount: "35",
     totalAmount: "1,900,035",
     lockupReleaseStartDate: new Date(new BN("1602614338293769340").divn(1000000).toNumber()),
     lockupState: {
@@ -95,5 +70,4 @@ export const lockupDataMock: readonly AccountLockup[] = [
       }
     }
   },
-
 ];

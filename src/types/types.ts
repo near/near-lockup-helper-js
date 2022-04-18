@@ -69,15 +69,11 @@ export type ViewAccountQuery = QueryResponseKind & {
   readonly locked: string;
   readonly code_hash: string;
   readonly storage_usage: number;
-  readonly storage_paid_at: number; //block_height
+  readonly storage_paid_at: number;
 };
 
 export type ViewAccount = {
   readonly amount: string;
-  readonly locked: string;
   readonly codeHash: string;
-  readonly storageUsage: number;
-  readonly storagePaidAt: number; //block_height
   readonly blockHeight: number;
-  readonly blockHash: string;
 };
