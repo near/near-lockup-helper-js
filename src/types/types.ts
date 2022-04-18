@@ -20,6 +20,7 @@ export type Lockup = {
 
 export type AccountLockup = {
   readonly lockupAccountId: string;
+  readonly calculatedAtBlockHeight: number;
   readonly ownerAccountBalance: string;
   readonly lockedAmount: string;
   readonly liquidAmount: string;
@@ -61,4 +62,22 @@ export type BlockReference = {
 export type ViewStateResult = QueryResponseKind & {
   readonly values: readonly StateItem[];
   readonly proof: readonly string[];
+};
+
+export type ViewAccountQuery = QueryResponseKind & {
+  readonly amount: string;
+  readonly locked: string;
+  readonly code_hash: string;
+  readonly storage_usage: number;
+  readonly storage_paid_at: number; //block_height
+};
+
+export type ViewAccount = {
+  readonly amount: string;
+  readonly locked: string;
+  readonly codeHash: string;
+  readonly storageUsage: number;
+  readonly storagePaidAt: number; //block_height
+  readonly blockHeight: number;
+  readonly blockHash: string;
 };

@@ -3,7 +3,15 @@ import * as nearAPI from "near-api-js";
 import { ConnectConfig } from "near-api-js/lib/connect";
 import { BinaryReader } from "near-api-js/lib/utils/serialize";
 
-import { AccountLockup, BlockReference, Lockup, LockupState, ViewStateResult } from "../types/types";
+import {
+  AccountLockup,
+  BlockReference,
+  Lockup,
+  LockupState,
+  ViewAccount,
+  ViewAccountQuery,
+  ViewStateResult
+} from "../types/types";
 
 import { getLockedTokenAmount } from "./balance";
 import { nearApi } from "./near";
@@ -30,8 +38,11 @@ export const viewLockupState = async (
   blockReference: BlockReference | any = { finality: "final" }
 ): Promise<LockupState> => {
   const near = await nearApi(nearConfig);
-  const lockupAccountCodeHash = (await (await near.account(contractId)).state())
-    .code_hash;
+  const lockupAccountCodeHash = (await viewLockupAccountBalance(
+    contractId,
+    nearConfig,
+    blockReference
+  )).codeHash;
 
   const result = await near.connection.provider.query<ViewStateResult>({
     request_type: "view_state",
@@ -97,6 +108,42 @@ export const lookupLockup = async (
 };
 
 /**
+ * View balance and state of lockup account.
+ * @param accountId near lockup accountId used to interact with the network.
+ * @param nearConfig specify custom connection to NEAR network.
+ * @param blockReference specify block of calculated data.
+ * @returns lockup account information {@link ViewAccount}
+ */
+export const viewLockupAccountBalance = async (
+  accountId: string,
+  nearConfig?: ConnectConfig,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blockReference: BlockReference | any = { finality: "final" }
+  ): Promise<ViewAccount | undefined> => {
+  const near = await nearApi(nearConfig);
+
+  try {
+    const viewAccount = await near.connection.provider.query<ViewAccountQuery>({
+      request_type: "view_account",
+      ...blockReference,
+      account_id: accountId,
+    });
+    return {
+      amount: viewAccount.amount,
+      locked: viewAccount.locked,
+      codeHash: viewAccount.code_hash,
+      storageUsage: viewAccount.storage_usage,
+      storagePaidAt: viewAccount.storage_paid_at,
+      blockHeight: viewAccount.block_height,
+      blockHash: viewAccount.block_hash
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  return undefined;
+};
+
+/**
  * View all information about lockup account.
  * @param lockupAccountId near lockup accountId used to interact with the network.
  * @param nearConfig specify custom connection to NEAR network.
@@ -108,15 +155,17 @@ export const viewLockupAccount = async (
   nearConfig?: ConnectConfig,
   blockReference?: BlockReference
 ): Promise<AccountLockup> => {
-  const near = await nearApi(nearConfig);
-
   try {
-    const account = await near.account(lockupAccountId);
-    const ownerAccountBalance = (await account.state()).amount;
-    const { lockupAccountBalance, lockupState } = await lookupLockup(
+    const account = await viewLockupAccountBalance(
       lockupAccountId,
       nearConfig,
       blockReference
+    );
+    const ownerAccountBalance = account.amount;
+    const { lockupAccountBalance, lockupState } = await lookupLockup(
+      lockupAccountId,
+      nearConfig,
+      { block_id: account.blockHeight }
     );
 
     if (lockupState) {
@@ -131,6 +180,7 @@ export const viewLockupAccount = async (
 
       return {
         lockupAccountId,
+        calculatedAtBlockHeight: account.blockHeight,
         ownerAccountBalance: nearAPI.utils.format.formatNearAmount(
           ownerAccountBalance,
           2
