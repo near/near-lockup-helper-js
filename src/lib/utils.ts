@@ -16,12 +16,12 @@ export const readOption = (reader: BinaryReader): string => {
 /**
  *
  * @param info {@link VestingInformation}.
- * @returns string | undefined.
+ * @returns string | null.
  */
 export const formatVestingInfo = (
   info: VestingInformation
-): string | undefined => {
-  if (!info?.start) return undefined; // TODO
+): string | null => {
+  if (!info?.start) return null; // TODO
   const start = new Date(info.start.divn(1000000).toNumber());
   const cliff = new Date(info.cliff.divn(1000000).toNumber());
   const end = new Date(info.end.divn(1000000).toNumber());
@@ -56,7 +56,7 @@ export const getStartLockupTimestamp = (
 /**
  *
  * @param reader {@link BinaryReader}.
- * @returns one of {@link VestingInformation} or undefined.
+ * @returns one of {@link VestingInformation} or null.
  */
 export const getVestingInformation = (
   reader: BinaryReader
@@ -79,7 +79,7 @@ export const getVestingInformation = (
         terminationStatus: reader.readU8(),
       };
     default:
-      return undefined; // TODO
+      return null; // TODO
   }
 };
 

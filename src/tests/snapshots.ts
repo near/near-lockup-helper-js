@@ -6,10 +6,10 @@ export const lockupAccountSnapshots: readonly AccountLockup[] = [
   {
     lockupAccountId: "05cf32355756bec4d48664d322130881a4ca289c.lockup.near",
     calculatedAtBlockHeight: 59976515,
-    ownerAccountBalance: "37.04",
-    lockedAmount: "253,476.3",
-    liquidAmount: "384,310.74",
-    totalAmount: "637,824.0",
+    ownerAccountBalance: "0.96",
+    lockedAmount: "291,967.65",
+    liquidAmount: "365,819.39",
+    totalAmount: "657,788.01",
     lockupReleaseStartDate: new Date(new BN("1602614338293769340").divn(1000000).toNumber()),
     lockupState: {
       owner: '567a69e5ee660392866f7540d2dc6e9b99fea9e5926b0021e7eca86049802e1d',
@@ -18,8 +18,8 @@ export const lockupAccountSnapshots: readonly AccountLockup[] = [
       lockupDuration: new BN("31536000000000000"),
       lockupTimestamp: new BN(0),
       hasBrokenTimestamp: true,
+      blockTimestamp: new BN("1645452538887204431"),
       releaseDuration: new BN("1460"),
-      vestingInformation: undefined,
       vestedInfo: undefined,
       transferInformation: {
         transfers_timestamp: new BN("1602614338293769340")
@@ -29,10 +29,10 @@ export const lockupAccountSnapshots: readonly AccountLockup[] = [
   {
     lockupAccountId: "84146973a9c419dc97a4a46641b5be70ee7f822e.lockup.near",
     calculatedAtBlockHeight: 59976515,
-    ownerAccountBalance: "35",
+    ownerAccountBalance: "5.01",
     lockedAmount: "47,090.07",
     liquidAmount: "0",
-    totalAmount: "47,125.07",
+    totalAmount: "47,095.08",
     lockupReleaseStartDate: new Date(new BN("1602614338293769340").divn(1000000).toNumber()),
     lockupState: {
       owner: 'xkv.near',
@@ -40,6 +40,7 @@ export const lockupAccountSnapshots: readonly AccountLockup[] = [
       terminationWithdrawnTokens: new BN("0"),
       lockupDuration: new BN("0"),
       lockupTimestamp: new BN(0),
+      blockTimestamp: new BN("1645452538887204431"),
       hasBrokenTimestamp: false,
       releaseDuration: new BN("0"),
       vestedInfo: "from Tue Jun 01 2021 19:06:00 GMT+0300 (Eastern European Summer Time) until Sat May 31 2025 06:52:40 GMT+0300 (Eastern European Summer Time) with cliff at Wed Jun 01 2022 20:12:40 GMT+0300 (Eastern European Summer Time)",
@@ -51,10 +52,10 @@ export const lockupAccountSnapshots: readonly AccountLockup[] = [
   {
     lockupAccountId: "80a50388377db2df7399e29d625c3d5b4552a81d.lockup.near",
     calculatedAtBlockHeight: 26490580,
-    ownerAccountBalance: "1,900,000",
+    ownerAccountBalance: "40",
     lockedAmount: "0",
-    liquidAmount: "35",
-    totalAmount: "1,900,035",
+    liquidAmount: "1,900,000",
+    totalAmount: "1,900,040",
     lockupReleaseStartDate: new Date(new BN("1602614338293769340").divn(1000000).toNumber()),
     lockupState: {
       owner: 'opgran01.near',
@@ -62,6 +63,7 @@ export const lockupAccountSnapshots: readonly AccountLockup[] = [
       terminationWithdrawnTokens: new BN("0"),
       lockupDuration: new BN("2628000000000000"),
       lockupTimestamp: new BN(0),
+      blockTimestamp: new BN("1609455599034863991"),
       hasBrokenTimestamp: true,
       releaseDuration: new BN("0"),
       vestedInfo: "from Tue Aug 25 2020 03:00:00 GMT+0300 (Eastern European Summer Time) until Sun Oct 25 2020 03:00:00 GMT+0300 (Eastern European Summer Time) with cliff at Sun Oct 25 2020 03:00:00 GMT+0300 (Eastern European Summer Time)",

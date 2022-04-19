@@ -8,14 +8,10 @@ export type LockupState = {
   readonly lockupDuration: BN;
   readonly releaseDuration?: BN;
   readonly lockupTimestamp?: BN;
+  readonly blockTimestamp: BN;
   readonly transferInformation: TransferInformation;
   readonly vestingInformation?: VestingInformation;
   readonly hasBrokenTimestamp: boolean;
-};
-
-export type Lockup = {
-  readonly lockupAccountBalance: string;
-  readonly lockupState: LockupState;
 };
 
 export type AccountLockup = {

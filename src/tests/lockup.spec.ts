@@ -1,7 +1,7 @@
 /* eslint-disable functional/no-loop-statement */
 import test from "ava";
 
-import { lookupLockup, viewLockupAccount, viewLockupState } from "../lib/lockup";
+import { getAccountBalance, viewLockupAccount, viewLockupState } from "../lib/lockup";
 import { connectOptions } from "../lib/near";
 
 import { lockupAccountSnapshots } from "./snapshots";
@@ -11,8 +11,8 @@ test("view state of lockup account", async (t) => {
   t.pass();
 });
 
-test("view balance and state of lockup account", async (t) => {
-  await lookupLockup(lockupAccountSnapshots[1].lockupAccountId);
+test("view account balance", async (t) => {
+  await getAccountBalance(lockupAccountSnapshots[1].lockupAccountId);
   t.pass();
 });
 

@@ -1,12 +1,12 @@
 import BN from "bn.js";
 import * as nearAPI from "near-api-js";
 import { ConnectConfig } from "near-api-js/lib/connect";
+import { CodeResult } from "near-api-js/lib/providers/provider";
 import { BinaryReader } from "near-api-js/lib/utils/serialize";
 
 import {
   AccountLockup,
   BlockReference,
-  Lockup,
   LockupState,
   ViewAccount,
   ViewAccountQuery,
@@ -37,11 +37,12 @@ export const viewLockupState = async (
   blockReference: BlockReference = { finality: "final" }
 ): Promise<LockupState> => {
   const near = await nearApi(nearConfig);
-  const lockupAccountCodeHash = (await viewLockupAccountBalance(
+  const accountCalcutationInfo = await viewAccountBalance(
     contractId,
     nearConfig,
     blockReference
-  )).codeHash;
+  );
+  const lockupAccountCodeHash = accountCalcutationInfo.codeHash;
 
   const result = await near.connection.provider.query<ViewStateResult>({
     request_type: "view_state",
@@ -50,6 +51,11 @@ export const viewLockupState = async (
     prefix_base64: Buffer.from("STATE", "utf-8").toString("base64"),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
+
+  const blockTimestamp = (await near.connection.provider.block(
+    { blockId: accountCalcutationInfo.blockHeight }
+  )).header.timestamp_nanosec;
+
   const value = Buffer.from(result.values[0].value, "base64");
   const reader = new BinaryReader(value);
   const owner = reader.readString();
@@ -74,6 +80,7 @@ export const viewLockupState = async (
     lockupDuration: new BN(lockupDuration),
     releaseDuration: new BN(releaseDuration),
     lockupTimestamp: new BN(lockupTimestamp),
+    blockTimestamp: new BN(blockTimestamp),
     transferInformation,
     vestingInformation,
     hasBrokenTimestamp,
@@ -81,44 +88,49 @@ export const viewLockupState = async (
 };
 
 /**
- * View balance and state of lockup account.
- * @param accountId near lockup accountId used to interact with the network.
+ * View current balance with balance sended for staking.
+ * @param contractId near lockup accountId used to interact with the network.
  * @param nearConfig specify custom connection to NEAR network.
  * @param blockReference specify block of calculated data.
+ * @returns
  */
-export const lookupLockup = async (
-  accountId: string,
+export const getAccountBalance = async (
+  contractId: string,
   nearConfig?: ConnectConfig,
-  blockReference?: BlockReference
-): Promise<Lockup> | undefined => {
+  blockReference: BlockReference = { finality: "final" }
+): Promise<string | null> => {
   const near = await nearApi(nearConfig);
+  const serializedArgs = Buffer.from(JSON.stringify({})).toString("base64");
   try {
-    const lockupAccount = await near.account(accountId);
-    const [lockupAccountBalance, lockupState] = await Promise.all([
-      lockupAccount.viewFunction(accountId, "get_balance", {}),
-      viewLockupState(accountId, nearConfig, blockReference),
-    ]);
-
-    return { lockupAccountBalance, lockupState };
+    const result = await near.connection.provider.query<CodeResult>({
+      request_type: 'call_function',
+      account_id: contractId,
+      method_name: "get_balance",
+      args_base64: serializedArgs,
+      ...blockReference
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    return result.result &&
+      result.result.length > 0 &&
+      JSON.parse(Buffer.from(result.result).toString()) || null;
   } catch (error) {
-    console.warn(error);
-    console.error(`${accountId} doesn't exist`);
-    return undefined;
+    console.error("getAccountBalance failed to fetch data due to:", error);
   }
+  return null;
 };
 
 /**
  * View balance and state of lockup account.
- * @param accountId near lockup accountId used to interact with the network.
+ * @param accountId near lockup account owner id used to interact with the network.
  * @param nearConfig specify custom connection to NEAR network.
  * @param blockReference specify block of calculated data.
- * @returns lockup account information {@link ViewAccount}
+ * @returns account codeHash and balance calculated at particular block {@link ViewAccount}.
  */
-export const viewLockupAccountBalance = async (
+export const viewAccountBalance = async (
   accountId: string,
   nearConfig?: ConnectConfig,
   blockReference: BlockReference = { finality: "final" }
-  ): Promise<ViewAccount | undefined> => {
+  ): Promise<ViewAccount | null> => {
   const near = await nearApi(nearConfig);
 
   try {
@@ -136,7 +148,7 @@ export const viewLockupAccountBalance = async (
   } catch (error) {
     console.error(error);
   }
-  return undefined;
+  return null;
 };
 
 /**
@@ -150,19 +162,12 @@ export const viewLockupAccount = async (
   lockupAccountId: string,
   nearConfig?: ConnectConfig,
   blockReference?: BlockReference
-): Promise<AccountLockup> => {
+): Promise<AccountLockup | null> => {
   try {
-    const account = await viewLockupAccountBalance(
-      lockupAccountId,
-      nearConfig,
-      blockReference
-    );
-    const ownerAccountBalance = account.amount;
-    const { lockupAccountBalance, lockupState } = await lookupLockup(
-      lockupAccountId,
-      nearConfig,
-      { block_id: account.blockHeight }
-    );
+    const [lockupAccountBalance, lockupState] = await Promise.all([
+      getAccountBalance(lockupAccountId, nearConfig, blockReference),
+      viewLockupState(lockupAccountId, nearConfig, blockReference),
+    ]);
 
     if (lockupState) {
       const { releaseDuration, vestingInformation, ...restLockupState } =
@@ -172,11 +177,20 @@ export const viewLockupAccount = async (
         lockupState.lockupTimestamp,
         lockupState.hasBrokenTimestamp
       );
-      const lockedAmount = await getLockedTokenAmount(lockupState);
+      const lockedAmount = getLockedTokenAmount(lockupState);
+
+      const {
+        amount: ownerAccountBalance,
+        blockHeight: calculatedAtBlockHeight
+      } = await viewAccountBalance(
+        lockupState.owner,
+        nearConfig,
+        blockReference
+      );
 
       return {
         lockupAccountId,
-        calculatedAtBlockHeight: account.blockHeight,
+        calculatedAtBlockHeight,
         ownerAccountBalance: nearAPI.utils.format.formatNearAmount(
           ownerAccountBalance,
           2
@@ -208,5 +222,5 @@ export const viewLockupAccount = async (
   } catch (error) {
     console.error(error);
   }
-  return undefined;
+  return null;
 };
