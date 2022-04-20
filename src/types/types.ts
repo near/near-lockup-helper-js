@@ -17,10 +17,10 @@ export type LockupState = {
 export type AccountLockup = {
   readonly lockupAccountId: string;
   readonly calculatedAtBlockHeight: number;
-  readonly ownerAccountBalance: string;
-  readonly lockedAmount: string;
-  readonly liquidAmount: string;
-  readonly totalAmount: string;
+  readonly ownerAccountBalance: BN;
+  readonly lockedAmount: BN;
+  readonly liquidAmount: BN;
+  readonly totalAmount: BN;
   readonly lockupReleaseStartDate: Date;
   readonly lockupState: LockupState & {
     readonly vestedInfo: string;

@@ -31,6 +31,7 @@ test("view all info about account on particular block using arhival credencials"
     keyStore: connectOptions.keyStore,
     headers: connectOptions.headers
   };
+
   // eslint-disable-next-line functional/no-let
   for (let i = 0; i < items; i++) {
     const res = await viewLockupAccount(

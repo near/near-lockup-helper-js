@@ -1,5 +1,4 @@
 import BN from "bn.js";
-import * as nearAPI from "near-api-js";
 import { ConnectConfig } from "near-api-js/lib/connect";
 import { CodeResult } from "near-api-js/lib/providers/provider";
 import { BinaryReader } from "near-api-js/lib/utils/serialize";
@@ -191,24 +190,10 @@ export const viewLockupAccount = async (
       return {
         lockupAccountId,
         calculatedAtBlockHeight,
-        ownerAccountBalance: nearAPI.utils.format.formatNearAmount(
-          ownerAccountBalance,
-          2
-        ),
-        lockedAmount: nearAPI.utils.format.formatNearAmount(
-          lockedAmount.toString(),
-          2
-        ),
-        liquidAmount: nearAPI.utils.format.formatNearAmount(
-          new BN(lockupAccountBalance).sub(new BN(lockedAmount)).toString(),
-          2
-        ),
-        totalAmount: nearAPI.utils.format.formatNearAmount(
-          new BN(ownerAccountBalance)
-            .add(new BN(lockupAccountBalance))
-            .toString(),
-          2
-        ),
+        ownerAccountBalance: new BN(ownerAccountBalance),
+        lockedAmount,
+        liquidAmount: new BN(lockupAccountBalance).sub(lockedAmount),
+        totalAmount: new BN(ownerAccountBalance).add(new BN(lockupAccountBalance)),
         lockupReleaseStartDate: new Date(
           lockupReleaseStartTimestamp.divn(1000000).toNumber()
         ),
