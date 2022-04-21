@@ -2,7 +2,6 @@
 import test from "ava";
 
 import { getAccountBalance, viewLockupAccount, viewLockupState } from "../lib/lockup";
-import { connectOptions } from "../lib/near";
 
 import { lockupAccountSnapshots } from "./snapshots";
 
@@ -24,19 +23,11 @@ test("view all info about lockup account on 'finality' block", async (t) => {
 test("view all info about account on particular block using arhival credencials", async (t) => {
   const items = lockupAccountSnapshots.length;
   t.plan(items);
-
-  const arhivalConfig = {
-    nodeUrl: "https://archival-rpc.mainnet.near.org",
-    networkId: "mainnet",
-    keyStore: connectOptions.keyStore,
-    headers: connectOptions.headers
-  };
-
   // eslint-disable-next-line functional/no-let
   for (let i = 0; i < items; i++) {
     const res = await viewLockupAccount(
       lockupAccountSnapshots[i].lockupAccountId,
-      arhivalConfig,
+      { nodeUrl: "https://archival-rpc.mainnet.near.org" },
       { block_id: lockupAccountSnapshots[i].calculatedAtBlockHeight }
     );
     t.deepEqual(res, lockupAccountSnapshots[i]);

@@ -1,11 +1,11 @@
 import BN from "bn.js";
-import { ConnectConfig } from "near-api-js/lib/connect";
 import { CodeResult } from "near-api-js/lib/providers/provider";
 import { BinaryReader } from "near-api-js/lib/utils/serialize";
 
 import {
   AccountLockup,
   BlockReference,
+  ConnectOptions,
   LockupState,
   ViewAccount,
   ViewAccountQuery,
@@ -32,7 +32,7 @@ import {
  */
 export const viewLockupState = async (
   contractId: string,
-  nearConfig?: ConnectConfig,
+  nearConfig?: ConnectOptions,
   blockReference: BlockReference = { finality: "final" }
 ): Promise<LockupState> => {
   const near = await nearApi(nearConfig);
@@ -95,7 +95,7 @@ export const viewLockupState = async (
  */
 export const getAccountBalance = async (
   contractId: string,
-  nearConfig?: ConnectConfig,
+  nearConfig?: ConnectOptions,
   blockReference: BlockReference = { finality: "final" }
 ): Promise<string | null> => {
   const near = await nearApi(nearConfig);
@@ -127,7 +127,7 @@ export const getAccountBalance = async (
  */
 export const viewAccountBalance = async (
   accountId: string,
-  nearConfig?: ConnectConfig,
+  nearConfig?: ConnectOptions,
   blockReference: BlockReference = { finality: "final" }
   ): Promise<ViewAccount | null> => {
   const near = await nearApi(nearConfig);
@@ -159,7 +159,7 @@ export const viewAccountBalance = async (
  */
 export const viewLockupAccount = async (
   lockupAccountId: string,
-  nearConfig?: ConnectConfig,
+  nearConfig?: ConnectOptions,
   blockReference?: BlockReference
 ): Promise<AccountLockup | null> => {
   try {

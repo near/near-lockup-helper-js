@@ -2,7 +2,9 @@ import * as near from "near-api-js";
 import { ConnectConfig } from "near-api-js/lib/connect";
 import { InMemoryKeyStore } from "near-api-js/lib/key_stores";
 
-export const connectOptions: ConnectConfig = {
+import { ConnectOptions } from "../types/types";
+
+const connectOptions: ConnectConfig = {
   nodeUrl: "https://rpc.mainnet.near.org",
   networkId: "mainnet",
   keyStore: new InMemoryKeyStore(),
@@ -11,10 +13,14 @@ export const connectOptions: ConnectConfig = {
 
 /**
  * Connect to NEAR rpc.
- * @param connectOptions connection options {@link ConnectConfig}.
+ * @param config connection options {@link ConnectConfig}.
  * @returns connection to Near network.
  */
-export const nearApi = async (config: ConnectConfig = connectOptions) => {
-  const options = config ?? connectOptions;
+export const nearApi = async (config?: ConnectOptions) => {
+  const options = {
+    ...connectOptions,
+    ...config
+  };
+
   return await near.connect(options)
 };
