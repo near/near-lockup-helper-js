@@ -1,4 +1,6 @@
 import BN from "bn.js";
+import { ConnectConfig } from "near-api-js/lib/connect";
+import { KeyStore } from "near-api-js/lib/key_stores/keystore";
 import { QueryResponseKind } from "near-api-js/lib/providers/provider";
 
 export type LockupState = {
@@ -72,4 +74,12 @@ export type ViewAccount = {
   readonly amount: string;
   readonly codeHash: string;
   readonly blockHeight: number;
+};
+
+export type ConnectOptions = Omit<ConnectConfig, "networkId" | "keyStore" | "headers"> & {
+  readonly networkId?: string;
+  readonly keyStore?: KeyStore;
+  readonly headers?: {
+    readonly [key: string]: string | number;
+  }
 };
