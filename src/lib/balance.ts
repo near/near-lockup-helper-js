@@ -68,11 +68,10 @@ const getUnvestedAmount = (
  * @param lockupState {@link LockupState}
  * @returns BN
  */
-export const getLockedTokenAmount = async (lockupState: LockupState) => {
+export const getLockedTokenAmount = (lockupState: LockupState) => {
   const phase2Time = new BN("1602614338293769340");
-  const now = new BN((new Date().getTime() * 1000000).toString());
 
-  if (now.lte(phase2Time)) {
+  if (lockupState.blockTimestamp.lte(phase2Time)) {
     return saturatingSub(
       lockupState.lockupAmount,
       lockupState.terminationWithdrawnTokens
@@ -83,9 +82,8 @@ export const getLockedTokenAmount = async (lockupState: LockupState) => {
     phase2Time.add(lockupState.lockupDuration),
     lockupState.lockupTimestamp
   );
-  const blockTimestamp = now;
 
-  if (blockTimestamp.lt(lockupTimestamp)) {
+  if (lockupState.blockTimestamp.lt(lockupTimestamp)) {
     return saturatingSub(
       lockupState.lockupAmount,
       lockupState.terminationWithdrawnTokens
@@ -96,13 +94,13 @@ export const getLockedTokenAmount = async (lockupState: LockupState) => {
     lockupState.releaseDuration,
     lockupState.lockupTimestamp,
     lockupState.hasBrokenTimestamp,
-    blockTimestamp,
+    lockupState.blockTimestamp,
     lockupState.lockupAmount
   );
 
   const unvestedAmount = getUnvestedAmount(
     lockupState?.vestingInformation,
-    blockTimestamp,
+    lockupState.blockTimestamp,
     lockupState.lockupAmount
   );
 

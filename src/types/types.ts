@@ -8,22 +8,19 @@ export type LockupState = {
   readonly lockupDuration: BN;
   readonly releaseDuration?: BN;
   readonly lockupTimestamp?: BN;
+  readonly blockTimestamp: BN;
   readonly transferInformation: TransferInformation;
   readonly vestingInformation?: VestingInformation;
   readonly hasBrokenTimestamp: boolean;
 };
 
-export type Lockup = {
-  readonly lockupAccountBalance: string;
-  readonly lockupState: LockupState;
-};
-
 export type AccountLockup = {
   readonly lockupAccountId: string;
-  readonly ownerAccountBalance: string;
-  readonly lockedAmount: string;
-  readonly liquidAmount: string;
-  readonly totalAmount: string;
+  readonly calculatedAtBlockHeight: number;
+  readonly ownerAccountBalance: BN;
+  readonly lockedAmount: BN;
+  readonly liquidAmount: BN;
+  readonly totalAmount: BN;
   readonly lockupReleaseStartDate: Date;
   readonly lockupState: LockupState & {
     readonly vestedInfo: string;
@@ -61,4 +58,18 @@ export type BlockReference = {
 export type ViewStateResult = QueryResponseKind & {
   readonly values: readonly StateItem[];
   readonly proof: readonly string[];
+};
+
+export type ViewAccountQuery = QueryResponseKind & {
+  readonly amount: string;
+  readonly locked: string;
+  readonly code_hash: string;
+  readonly storage_usage: number;
+  readonly storage_paid_at: number;
+};
+
+export type ViewAccount = {
+  readonly amount: string;
+  readonly codeHash: string;
+  readonly blockHeight: number;
 };
