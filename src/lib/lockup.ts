@@ -9,7 +9,7 @@ import {
   LockupState,
   ViewAccount,
   ViewAccountQuery,
-  ViewStateResult
+  ViewStateResult,
 } from "../types/types";
 
 import { getLockedTokenAmount } from "./balance";
@@ -48,12 +48,14 @@ export const viewLockupState = async (
     ...blockReference,
     account_id: contractId,
     prefix_base64: Buffer.from("STATE", "utf-8").toString("base64"),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
-  const blockTimestamp = (await near.connection.provider.block(
-    { blockId: accountCalcutationInfo.blockHeight }
-  )).header.timestamp_nanosec;
+  const blockTimestamp = (
+    await near.connection.provider.block({
+      blockId: accountCalcutationInfo.blockHeight,
+    })
+  ).header.timestamp_nanosec;
 
   const value = Buffer.from(result.values[0].value, "base64");
   const reader = new BinaryReader(value);
@@ -87,35 +89,52 @@ export const viewLockupState = async (
 };
 
 /**
- * View current balance with balance sended for staking.
+ * View lockup account balance including the tokens delegated for staking.
  * @param contractId near lockup accountId used to interact with the network.
  * @param nearConfig specify custom connection to NEAR network.
  * @param blockReference specify block of calculated data.
- * @returns
+ * @returns yoctoNEAR amount of tokens
  */
-export const getAccountBalance = async (
+export const getLockupAccountBalance = async (
   contractId: string,
   nearConfig?: ConnectOptions,
   blockReference: BlockReference = { finality: "final" }
-): Promise<string | null> => {
+): Promise<BN> => {
   const near = await nearApi(nearConfig);
-  const serializedArgs = Buffer.from(JSON.stringify({})).toString("base64");
-  try {
-    const result = await near.connection.provider.query<CodeResult>({
-      request_type: 'call_function',
+  const delegatedStakingPoolAccountIdResponse =
+    await near.connection.provider.query<CodeResult>({
+      request_type: "call_function",
       account_id: contractId,
-      method_name: "get_balance",
-      args_base64: serializedArgs,
-      ...blockReference
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      method_name: "get_staking_pool_account_id",
+      args_base64: Buffer.from(JSON.stringify({})).toString("base64"),
+      ...blockReference,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
-    return result.result &&
-      result.result.length > 0 &&
-      JSON.parse(Buffer.from(result.result).toString()) || null;
-  } catch (error) {
-    console.error("getAccountBalance failed to fetch data due to:", error);
+  const delegatedStakingPoolAccountId = JSON.parse(
+    Buffer.from(delegatedStakingPoolAccountIdResponse.result).toString()
+  );
+  const accountBalance = await viewAccountBalance(
+    contractId,
+    nearConfig,
+    blockReference
+  );
+  if (delegatedStakingPoolAccountId) {
+    const delegatedStakingBalanceResponse =
+      await near.connection.provider.query<CodeResult>({
+        request_type: "call_function",
+        account_id: delegatedStakingPoolAccountId,
+        method_name: "get_account_total_balance",
+        args_base64: Buffer.from(
+          JSON.stringify({ account_id: contractId })
+        ).toString("base64"),
+        ...blockReference,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    return new BN(
+      JSON.parse(Buffer.from(delegatedStakingBalanceResponse.result).toString())
+    ).add(accountBalance.amount);
   }
-  return null;
+  return accountBalance.amount;
 };
 
 /**
@@ -129,25 +148,20 @@ export const viewAccountBalance = async (
   accountId: string,
   nearConfig?: ConnectOptions,
   blockReference: BlockReference = { finality: "final" }
-  ): Promise<ViewAccount | null> => {
+): Promise<ViewAccount> => {
   const near = await nearApi(nearConfig);
 
-  try {
-    const viewAccount = await near.connection.provider.query<ViewAccountQuery>({
-      request_type: "view_account",
-      ...blockReference,
-      account_id: accountId,
+  const viewAccount = await near.connection.provider.query<ViewAccountQuery>({
+    request_type: "view_account",
+    ...blockReference,
+    account_id: accountId,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
-    return {
-      amount: viewAccount.amount,
-      codeHash: viewAccount.code_hash,
-      blockHeight: viewAccount.block_height,
-    }
-  } catch (error) {
-    console.error(error);
-  }
-  return null;
+  } as any);
+  return {
+    amount: new BN(viewAccount.amount),
+    codeHash: viewAccount.code_hash,
+    blockHeight: viewAccount.block_height,
+  };
 };
 
 /**
@@ -164,7 +178,7 @@ export const viewLockupAccount = async (
 ): Promise<AccountLockup | null> => {
   try {
     const [lockupAccountBalance, lockupState] = await Promise.all([
-      getAccountBalance(lockupAccountId, nearConfig, blockReference),
+      getLockupAccountBalance(lockupAccountId, nearConfig, blockReference),
       viewLockupState(lockupAccountId, nearConfig, blockReference),
     ]);
 
@@ -180,7 +194,7 @@ export const viewLockupAccount = async (
 
       const {
         amount: ownerAccountBalance,
-        blockHeight: calculatedAtBlockHeight
+        blockHeight: calculatedAtBlockHeight,
       } = await viewAccountBalance(
         lockupState.owner,
         nearConfig,
@@ -193,7 +207,9 @@ export const viewLockupAccount = async (
         ownerAccountBalance: new BN(ownerAccountBalance),
         lockedAmount,
         liquidAmount: new BN(lockupAccountBalance).sub(lockedAmount),
-        totalAmount: new BN(ownerAccountBalance).add(new BN(lockupAccountBalance)),
+        totalAmount: new BN(ownerAccountBalance).add(
+          new BN(lockupAccountBalance)
+        ),
         lockupReleaseStartDate: new Date(
           lockupReleaseStartTimestamp.divn(1000000).toNumber()
         ),

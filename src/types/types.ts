@@ -47,15 +47,18 @@ type StateItem = {
   readonly key: string;
   readonly value: string;
   readonly proof: readonly string[];
-}
-
-export type BlockReference = {
-  readonly block_id: string | number;
-} | {
-  readonly finality: "optimistic" | "near-final" | "final";
-} | {
-  readonly sync_checkpoint: "genesis" | "earliest_available";
 };
+
+export type BlockReference =
+  | {
+      readonly block_id: string | number;
+    }
+  | {
+      readonly finality: "optimistic" | "near-final" | "final";
+    }
+  | {
+      readonly sync_checkpoint: "genesis" | "earliest_available";
+    };
 
 export type ViewStateResult = QueryResponseKind & {
   readonly values: readonly StateItem[];
@@ -71,15 +74,18 @@ export type ViewAccountQuery = QueryResponseKind & {
 };
 
 export type ViewAccount = {
-  readonly amount: string;
+  readonly amount: BN;
   readonly codeHash: string;
   readonly blockHeight: number;
 };
 
-export type ConnectOptions = Omit<ConnectConfig, "networkId" | "keyStore" | "headers"> & {
+export type ConnectOptions = Omit<
+  ConnectConfig,
+  "networkId" | "keyStore" | "headers"
+> & {
   readonly networkId?: string;
   readonly keyStore?: KeyStore;
   readonly headers?: {
     readonly [key: string]: string | number;
-  }
+  };
 };

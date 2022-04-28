@@ -18,9 +18,7 @@ export const readOption = (reader: BinaryReader): string => {
  * @param info {@link VestingInformation}.
  * @returns string | null.
  */
-export const formatVestingInfo = (
-  info: VestingInformation
-): string | null => {
+export const formatVestingInfo = (info: VestingInformation): string | null => {
   if (!info?.start) return null; // TODO
   const start = new Date(info.start.divn(1000000).toNumber());
   const cliff = new Date(info.cliff.divn(1000000).toNumber());

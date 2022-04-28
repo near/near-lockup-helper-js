@@ -1,7 +1,11 @@
 /* eslint-disable functional/no-loop-statement */
 import test from "ava";
 
-import { getAccountBalance, viewLockupAccount, viewLockupState } from "../lib/lockup";
+import {
+  getLockupAccountBalance,
+  viewLockupAccount,
+  viewLockupState,
+} from "../lib/lockup";
 
 import { lockupAccountSnapshots } from "./snapshots";
 
@@ -11,7 +15,7 @@ test("view state of lockup account", async (t) => {
 });
 
 test("view account balance", async (t) => {
-  await getAccountBalance(lockupAccountSnapshots[1].lockupAccountId);
+  await getLockupAccountBalance(lockupAccountSnapshots[1].lockupAccountId);
   t.pass();
 });
 
@@ -30,6 +34,14 @@ test("view all info about account on particular block using arhival credencials"
       { nodeUrl: "https://archival-rpc.mainnet.near.org" },
       { block_id: lockupAccountSnapshots[i].calculatedAtBlockHeight }
     );
-    t.deepEqual(res, lockupAccountSnapshots[i]);
+    t.deepEqual(
+      lockupAccountSnapshots[i],
+      res,
+      `i=${i}\nTotal:\n${res.totalAmount.toString()}\n${lockupAccountSnapshots[
+        i
+      ].totalAmount.toString()}\nLiquid:\n${res.liquidAmount.toString()}\n${lockupAccountSnapshots[
+        i
+      ].liquidAmount.toString()}`
+    );
   }
 });
