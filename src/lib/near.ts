@@ -19,8 +19,8 @@ const connectOptions: ConnectConfig = {
 export const nearApi = async (config?: ConnectOptions) => {
   const options = {
     ...connectOptions,
-    ...config
+    ...config,
   };
 
-  return await near.connect(options)
+  return await near.connect(options);
 };
