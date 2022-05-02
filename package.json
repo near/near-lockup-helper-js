@@ -1,6 +1,6 @@
 {
   "name": "near-lockup-helper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Javascript library to view lockup account information",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
