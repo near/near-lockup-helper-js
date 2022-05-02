@@ -1,0 +1,4 @@
+{
+  "words": ["unvested", "divn", "nanosec", "yocto", "yoctoNEAR"],
+  "ignorePaths": ["src/tests/snapshots.ts"]
+}

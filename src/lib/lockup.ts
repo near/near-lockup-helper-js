@@ -15,7 +15,7 @@ import {
 import { getLockedTokenAmount } from "./balance";
 import { nearApi } from "./near";
 import {
-  formatReleseDuration,
+  formatReleaseDuration,
   formatVestingInfo,
   getStartLockupTimestamp,
   getTransferInformation,
@@ -36,12 +36,12 @@ export const viewLockupState = async (
   blockReference: BlockReference = { finality: "final" }
 ): Promise<LockupState> => {
   const near = await nearApi(nearConfig);
-  const accountCalcutationInfo = await viewAccountBalance(
+  const accountCalculationInfo = await viewAccountBalance(
     contractId,
     nearConfig,
     blockReference
   );
-  const lockupAccountCodeHash = accountCalcutationInfo.codeHash;
+  const lockupAccountCodeHash = accountCalculationInfo.codeHash;
 
   const result = await near.connection.provider.query<ViewStateResult>({
     request_type: "view_state",
@@ -53,7 +53,7 @@ export const viewLockupState = async (
 
   const blockTimestamp = (
     await near.connection.provider.block({
-      blockId: accountCalcutationInfo.blockHeight,
+      blockId: accountCalculationInfo.blockHeight,
     })
   ).header.timestamp_nanosec;
 
@@ -215,7 +215,7 @@ export const viewLockupAccount = async (
         ),
         lockupState: {
           ...restLockupState,
-          releaseDuration: formatReleseDuration(releaseDuration),
+          releaseDuration: formatReleaseDuration(releaseDuration),
           vestedInfo: formatVestingInfo(vestingInformation),
         },
       };

@@ -31,7 +31,7 @@ export const formatVestingInfo = (info: VestingInformation): string | null => {
  * @param releaseDuration BN.
  * @returns BN.
  */
-export const formatReleseDuration = (releaseDuration: BN): BN =>
+export const formatReleaseDuration = (releaseDuration: BN): BN =>
   releaseDuration.div(new BN("1000000000")).divn(60).divn(60).divn(24);
 
 /**

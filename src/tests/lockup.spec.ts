@@ -24,7 +24,7 @@ test("view all info about lockup account on 'finality' block", async (t) => {
   t.pass();
 });
 
-test("view all info about account on particular block using arhival credencials", async (t) => {
+test("view all info about account on particular block using archival credentials", async (t) => {
   const items = lockupAccountSnapshots.length;
   t.plan(items);
   // eslint-disable-next-line functional/no-let
